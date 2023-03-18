@@ -38,6 +38,7 @@ func (d *dao) Account() repository.Account {
 	return NewAccount(d.db)
 }
 
+// 外部キー制約を無効にしてから、テーブルを削除してる
 func (d *dao) InitAll() error {
 	if err := d.exec("SET FOREIGN_KEY_CHECKS=0"); err != nil {
 		return fmt.Errorf("Can't disable FOREIGN_KEY_CHECKS: %w", err)

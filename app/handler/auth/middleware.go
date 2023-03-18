@@ -12,7 +12,15 @@ import (
 
 var contextKey = new(struct{})
 
-// Auth by header
+/**
+ * example:
+ *
+ * http.Handle("/protected", auth.Middleware(appInstance)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+ *   account := auth.AccountOf(r)
+ *   fmt.Fprintf(w, "Hello, %s!", account.Username)
+ *  })))
+ */
+// Auth by headeropen
 func Middleware(app *app.App) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

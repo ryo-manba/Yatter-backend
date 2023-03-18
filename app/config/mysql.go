@@ -9,6 +9,7 @@ import (
 )
 
 // accessor namespace
+// MYSQL変数を使用して、_mysqlに定義されたメソッドにアクセスできる
 var MySQL _mysql
 
 type _mysql struct{}

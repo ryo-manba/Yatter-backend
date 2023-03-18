@@ -20,7 +20,7 @@ func NewRouter(app *app.App) http.Handler {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	r.Use(middleware.Recoverer) // パニックが発生した時に、エラーログを記録する
 	r.Use(newCORS().Handler)
 
 	// Set a timeout value on the request context (ctx), that will signal
