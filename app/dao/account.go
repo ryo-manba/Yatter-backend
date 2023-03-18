@@ -37,3 +37,33 @@ func (r *account) FindByUsername(ctx context.Context, username string) (*object.
 
 	return entity, nil
 }
+
+// Add : 新規ユーザ作成
+func (r *account) Add(ctx context.Context, account *object.Account) (*object.Account, error) {
+	query := `
+		INSERT INTO account (username, password_hash, display_name, avatar, header, note)
+		VALUES (?, ?, ?, ?, ?, ?)
+	`
+
+	result, err := r.db.ExecContext(ctx, query,
+		account.Username,
+		account.PasswordHash,
+		account.DisplayName,
+		account.Avatar,
+		account.Header,
+		account.Note,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 挿入に成功した場合にidを取得して、accountのIDに設定する
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	account.ID = id
+	return account, nil
+}

@@ -14,28 +14,30 @@ type (
 	// Account account
 	Account struct {
 		// The internal ID of the account
-		ID AccountID `json:"-"`
+		ID AccountID `json:"-" db:"id"`
 
 		// The username of the account
-		Username string `json:"username,omitempty"`
+		// omitemptyは、ゼロ値である場合無視してくれる
+		Username string `json:"username,omitempty" db:"username"`
 
 		// The username of the account
+		// json:"-"とすることで、JSONへの出力を無効にしている
 		PasswordHash string `json:"-" db:"password_hash"`
 
 		// The account's display name
 		DisplayName *string `json:"display_name,omitempty" db:"display_name"`
 
 		// URL to the avatar image
-		Avatar *string `json:"avatar,omitempty"`
+		Avatar *string `json:"avatar,omitempty" db:"avatar"`
 
 		// URL to the header image
-		Header *string `json:"header,omitempty"`
+		Header *string `json:"header,omitempty" db:"header"`
 
 		// Biography of user
-		Note *string `json:"note,omitempty"`
+		Note *string `json:"note,omitempty" db:"note"`
 
 		// The time the account was created
-		CreateAt DateTime `json:"create_at,omitempty" db:"create_at"`
+		CreateAt DateTime `json:"create_at,omitempty" db:"create_at,omitempty"`
 	}
 )
 
