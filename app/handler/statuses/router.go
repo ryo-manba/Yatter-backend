@@ -26,5 +26,7 @@ func NewRouter(app *app.App) http.Handler {
 		r.Post("/", h.Create)
 	})
 
+	r.Get("/{id}", h.Get)
+
 	return r
 }

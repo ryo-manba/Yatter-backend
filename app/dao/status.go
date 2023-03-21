@@ -26,13 +26,23 @@ func NewStatus(db *sqlx.DB) repository.Status {
 // FindWIthAccountByID : アカウントの情報と共にステータスを取得する
 func (r *status) FindWithAccountByID(ctx context.Context, id int64) (*object.Status, error) {
 	query := `
-		SELECT s.*, a.* FROM status s
-		INNER JOIN account a ON s.account_id = a.id
-		WHERE s.id = ?
+	SELECT s.id,
+				 s.content,
+				 s.create_at as status_create_at,
+				 a.id,
+				 a.username,
+				 a.password_hash,
+				 a.display_name,
+				 a.avatar,
+				 a.header,
+				 a.note,
+				 a.create_at as account_create_at
+	FROM status s
+	INNER JOIN account a ON s.account_id = a.id
+	WHERE s.id = ?
 	`
 	statusEntity := new(object.Status)
 	accountEntity := new(object.Account)
-
 	err := r.db.QueryRowxContext(ctx, query, id).Scan(
 		&statusEntity.ID,
 		&statusEntity.Content,

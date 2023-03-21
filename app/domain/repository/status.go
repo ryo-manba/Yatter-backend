@@ -11,4 +11,7 @@ type Status interface {
 	FindWithAccountByID(ctx context.Context, id int64) (*object.Status, error)
 	// Create Status
 	Add(ctx context.Context, status *object.Status) (*object.Status, error)
+
+	// Find Status
+	//	FindById(ctx context.Context, id int64) (*object.Status, error)
 }
