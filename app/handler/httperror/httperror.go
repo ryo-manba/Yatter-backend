@@ -15,6 +15,11 @@ func BadRequest(w http.ResponseWriter, err error) {
 	http.Error(w, err.Error(), http.StatusBadRequest)
 }
 
+// Response with Not Found (404)
+func NotFound(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusNotFound)
+}
+
 // Response with Internal Server Error (500)
 func InternalServerError(w http.ResponseWriter, err error) {
 	log.Printf("[InternalServerError] %+v", err)

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"yatter-backend-go/app/domain/customerror"
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
 
@@ -24,7 +25,7 @@ func NewStatus(db *sqlx.DB) repository.Status {
 }
 
 // FindWIthAccountByID : アカウントの情報と共にステータスを取得する
-func (r *status) FindWithAccountByID(ctx context.Context, id int64) (*object.Status, error) {
+func (r *status) FindWithAccountByID(ctx context.Context, id object.StatusID) (*object.Status, error) {
 	query := `
 	SELECT s.id,
 				 s.content,
@@ -74,8 +75,6 @@ func (r *status) Add(ctx context.Context, status *object.Status) (*object.Status
 	INSERT INTO status (account_id, content)
 	VALUES (?, ?)
 `
-	println("status.AccountID", status.Account.ID)
-	println("status.Content", status.Content)
 	result, err := r.db.ExecContext(ctx, query, status.Account.ID, status.Content)
 	if err != nil {
 		return nil, err
@@ -89,4 +88,28 @@ func (r *status) Add(ctx context.Context, status *object.Status) (*object.Status
 	status.ID = id
 	// アカウントのデータとともにステータスを返却する
 	return status, nil
+}
+
+// DeleteByID : ステータスの削除
+func (r *status) DeleteByID(ctx context.Context, id object.StatusID) error {
+	query := `
+		DELETE FROM status
+		WHERE id = ?
+	`
+	result, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	println("affectedRows", affectedRows)
+	// 削除したかを確かめる
+	if affectedRows == 0 {
+		return customerror.ErrNotFound
+	}
+	return nil
 }
