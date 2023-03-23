@@ -13,7 +13,6 @@ import (
 	"yatter-backend-go/app/app"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAccountRegistration(t *testing.T) {
@@ -58,14 +57,14 @@ func TestAccountRegistration(t *testing.T) {
 				resp, err = c.Get(tc.apiPath)
 			}
 
-			require.NoError(t, err)
-			require.Equal(t, http.StatusOK, resp.StatusCode)
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 			body, err := io.ReadAll(resp.Body)
-			require.NoError(t, err)
+			assert.NoError(t, err)
 
 			var res map[string]interface{}
-			require.NoError(t, json.Unmarshal(body, &res))
+			assert.NoError(t, json.Unmarshal(body, &res))
 
 			assert.Equal(t, tc.expectedRes["username"], res["username"])
 		})
