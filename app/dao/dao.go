@@ -2,7 +2,9 @@ package dao
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 	"yatter-backend-go/app/domain/repository"
 
 	"github.com/jmoiron/sqlx"
@@ -22,6 +24,9 @@ type (
 
 		// Clear all data in DB
 		InitAll() error
+
+		// Setup Test DB data
+		SetupTestDB() error
 	}
 
 	// Implementation for DAO
@@ -71,6 +76,32 @@ func (d *dao) InitAll() error {
 		}
 	}
 
+	return nil
+}
+
+const seedPath = "/work/yatter-backend-go/ddl/tool/seed.sql"
+
+// seedの値を入れる
+func (d *dao) SetupTestDB() error {
+	content, err := ioutil.ReadFile(seedPath)
+	if err != nil {
+		return fmt.Errorf("Failed to read seed file : %+v", err)
+	}
+	// SQLステートメントを実行します。
+	sqlStatements := strings.Split(string(content), ";")
+	for _, stmt := range sqlStatements {
+		if strings.TrimSpace(stmt) == "" {
+			continue
+		}
+		err := d.exec(stmt)
+		if err != nil {
+			log.Fatalf("Failed to execute statement: %v\n%v", stmt, err)
+			return fmt.Errorf("Failed to execute seed query : %v\n%+v", stmt, err)
+		} else {
+			// FIXME: debug用
+			fmt.Printf("Successfully executed statement: %v\n", stmt)
+		}
+	}
 	return nil
 }
 

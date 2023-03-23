@@ -23,7 +23,13 @@ func NewApp() (*App, error) {
 	return &App{Dao: dao}, nil
 }
 
-// for tests
-func NewAppWithDao(dao dao.Dao) (*App, error) {
+// Create dependency manager for tests
+func NewTestApp() (*App, error) {
+	testCfg := config.MySQLTestConfig()
+	dao, err := dao.New(testCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	return &App{Dao: dao}, nil
 }

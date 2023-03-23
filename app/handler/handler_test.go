@@ -33,9 +33,9 @@ func TestAccountRegistration(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		var j map[string]interface{}
-		if assert.NoError(t, json.Unmarshal(body, &j)) {
-			assert.Equal(t, "john", j["username"])
+		var res map[string]interface{}
+		if assert.NoError(t, json.Unmarshal(body, &res)) {
+			assert.Equal(t, "john", res["username"])
 		}
 	}()
 
@@ -53,20 +53,23 @@ func TestAccountRegistration(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		var j map[string]interface{}
-		if assert.NoError(t, json.Unmarshal(body, &j)) {
-			assert.Equal(t, "john", j["username"])
+		var res map[string]interface{}
+		if assert.NoError(t, json.Unmarshal(body, &res)) {
+			assert.Equal(t, "john", res["username"])
 		}
 	}()
 }
 
 func setup(t *testing.T) *C {
-	app, err := app.NewApp()
+	app, err := app.NewTestApp()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	if err := app.Dao.InitAll(); err != nil {
+		t.Fatal(err)
+	}
+	if err := app.Dao.SetupTestDB(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -78,6 +81,7 @@ func setup(t *testing.T) *C {
 	}
 }
 
+// テストで使用するHTTPクライアントとサーバーの情報を保持する
 type C struct {
 	App    *app.App
 	Server *httptest.Server
