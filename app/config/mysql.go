@@ -23,6 +23,15 @@ func (_mysql) Host() string {
 	return v
 }
 
+// Read MySQL host
+func (_mysql) TestHost() string {
+	v, err := getString("TEST_MYSQL_HOST")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return v
+}
+
 // Read MySQL user
 func (_mysql) User() string {
 	v, err := getString("MYSQL_USER")
@@ -70,6 +79,22 @@ func MySQLConfig() *mysql.Config {
 	cfg.ParseTime = true
 	cfg.Loc = MySQL.Location()
 	if host := MySQL.Host(); host != "" {
+		cfg.Net = "tcp"
+		cfg.Addr = host
+	}
+	cfg.User = MySQL.User()
+	cfg.Passwd = MySQL.Password()
+	cfg.DBName = MySQL.Database()
+
+	return cfg
+}
+
+func MySQLTestConfig() *mysql.Config {
+	cfg := mysql.NewConfig()
+
+	cfg.ParseTime = true
+	cfg.Loc = MySQL.Location()
+	if host := MySQL.TestHost(); host != "" {
 		cfg.Net = "tcp"
 		cfg.Addr = host
 	}

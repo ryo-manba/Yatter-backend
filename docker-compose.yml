@@ -15,6 +15,21 @@ services:
       - "./ddl:/docker-entrypoint-initdb.d"
     restart: on-failure
 
+  mysql_test:
+    image: mysql:5.7
+    command: "mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-time-zone='+9:00'"
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: yatter
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_USER: yatter
+      MYSQL_PASSWORD: yatter
+    volumes:
+      - "./.data/mysql-test:/var/lib/mysql"
+      - "./ddl:/docker-entrypoint-initdb.d"
+    restart: on-failure
+
   web:
     build:
       context: .

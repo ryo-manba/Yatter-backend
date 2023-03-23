@@ -22,3 +22,8 @@ func NewApp() (*App, error) {
 
 	return &App{Dao: dao}, nil
 }
+
+// for tests
+func NewAppWithDao(dao dao.Dao) (*App, error) {
+	return &App{Dao: dao}, nil
+}
