@@ -17,6 +17,9 @@ type (
 		// Get status repository
 		Status() repository.Status
 
+		// Get timeline repository
+		Timeline() repository.Timeline
+
 		// Clear all data in DB
 		InitAll() error
 	}
@@ -43,6 +46,10 @@ func (d *dao) Account() repository.Account {
 
 func (d *dao) Status() repository.Status {
 	return NewStatus(d.db)
+}
+
+func (d *dao) Timeline() repository.Timeline {
+	return NewTimeline(d.db)
 }
 
 // 外部キー制約を無効にしてから、テーブルを削除してる
