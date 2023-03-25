@@ -10,6 +10,7 @@ import (
 	"path"
 	"testing"
 	"yatter-backend-go/app/app"
+	"yatter-backend-go/app/domain/object"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -251,6 +252,67 @@ func TestStatusesGet(t *testing.T) {
 	}
 }
 
+func TestPublicTimelineGet(t *testing.T) {
+	c := setup(t)
+	defer c.Close()
+
+	const apiPath = "/v1/timelines/public"
+	testCases := []struct {
+		name         string
+		query        string
+		limit        int
+		expectedCode int
+	}{
+		{
+			name:         "正常系：タイムラインが存在する",
+			query:        "?only_media=1&since_id=1&max_id=10&limit=5",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "正常系：タイムラインが存在しない",
+			query:        "?only_media=1&since_id=450&max_id=500&limit=5",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "正常系：パラメータの指定なし",
+			query:        "",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "異常系：max_idが負の値",
+			query:        "?only_media=1&max_id=-1&since_id=1&limit=5",
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			var resp *http.Response
+			var err error
+
+			resp, err = c.GetWithQuery(apiPath, tc.query)
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectedCode, resp.StatusCode)
+
+			body, err := io.ReadAll(resp.Body)
+			assert.NoError(t, err)
+
+			if tc.expectedCode == http.StatusOK {
+				var res []*object.Status
+				assert.NoError(t, json.Unmarshal(body, &res))
+				length := len(res)
+				if length > 0 {
+					assert.NotEqual(t, nil, res[0].Account)
+					assert.NotEqual(t, nil, res[0].Content)
+				}
+			}
+		})
+	}
+}
+
+/// utils
 func setup(t *testing.T) *C {
 	app, err := app.NewTestApp()
 	if err != nil {
@@ -293,6 +355,22 @@ func (c *C) Get(apiPath string) (*http.Response, error) {
 func (c *C) asURL(apiPath string) string {
 	baseURL, _ := url.Parse(c.Server.URL)
 	baseURL.Path = path.Join(baseURL.Path, apiPath)
+	return baseURL.String()
+}
+
+func (c *C) GetWithQuery(apiPath, query string) (*http.Response, error) {
+	reqURL := c.asURLWithQuery(apiPath, query)
+	req, err := http.NewRequest("GET", reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.Server.Client().Do(req)
+}
+
+func (c *C) asURLWithQuery(apiPath, query string) string {
+	baseURL, _ := url.Parse(c.Server.URL)
+	baseURL.Path = path.Join(baseURL.Path, apiPath)
+	baseURL.RawQuery = query
 	return baseURL.String()
 }
 
