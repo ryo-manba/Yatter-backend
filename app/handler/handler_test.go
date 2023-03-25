@@ -19,29 +19,32 @@ func TestAccountRegistration(t *testing.T) {
 	c := setup(t)
 	defer c.Close()
 
+	const apiPath = "/v1/accounts"
 	testCases := []struct {
-		name        string
-		method      string
-		apiPath     string
-		payload     string
-		expectedRes map[string]interface{}
+		name         string
+		payload      string
+		expectedCode int
+		expectedRes  map[string]interface{}
 	}{
 		{
-			name:    "RegisterAccount",
-			method:  "POST",
-			apiPath: "/v1/accounts",
-			payload: `{"username":"john"}`,
+			name:         "正常系：作成できる",
+			payload:      `{"username":"john"}`,
+			expectedCode: http.StatusOK,
 			expectedRes: map[string]interface{}{
 				"username": "john",
 			},
 		},
 		{
-			name:    "GetAccount",
-			method:  "GET",
-			apiPath: "/v1/accounts/john",
-			expectedRes: map[string]interface{}{
-				"username": "john",
-			},
+			name:         "異常系：すでにユーザーが存在する",
+			payload:      `{"username":"john"}`,
+			expectedCode: http.StatusInternalServerError, // TODO: 409 Conflictを返すようにする？
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：パラメータが不正",
+			payload:      `{"name":"john"}`,
+			expectedCode: http.StatusBadRequest,
+			expectedRes:  map[string]interface{}{},
 		},
 	}
 
@@ -51,22 +54,75 @@ func TestAccountRegistration(t *testing.T) {
 			var resp *http.Response
 			var err error
 
-			if tc.method == "POST" {
-				resp, err = c.PostJSON(tc.apiPath, tc.payload)
-			} else if tc.method == "GET" {
-				resp, err = c.Get(tc.apiPath)
-			}
+			resp, err = c.PostJSON(apiPath, tc.payload)
 
 			assert.NoError(t, err)
-			assert.Equal(t, http.StatusOK, resp.StatusCode)
+			assert.Equal(t, tc.expectedCode, resp.StatusCode)
 
 			body, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err)
 
-			var res map[string]interface{}
-			assert.NoError(t, json.Unmarshal(body, &res))
+			if tc.expectedCode == http.StatusOK {
+				var res map[string]interface{}
+				assert.NoError(t, json.Unmarshal(body, &res))
+				assert.Equal(t, tc.expectedRes["username"], res["username"])
+			}
+		})
+	}
+}
 
-			assert.Equal(t, tc.expectedRes["username"], res["username"])
+func TestAccountGet(t *testing.T) {
+	c := setup(t)
+	defer c.Close()
+
+	const apiPath = "/v1/accounts/"
+	testCases := []struct {
+		name         string
+		pathParam    string
+		expectedCode int
+		expectedRes  map[string]interface{}
+	}{
+		{
+			name:         "正常系：ユーザーが存在する",
+			pathParam:    "test-user1",
+			expectedCode: http.StatusOK,
+			expectedRes: map[string]interface{}{
+				"username": "test-user1",
+			},
+		},
+		{
+			name:         "正常系：ユーザーが存在しない",
+			pathParam:    "notfound",
+			expectedCode: http.StatusOK,
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：パラメータなし",
+			pathParam:    "",
+			expectedCode: http.StatusMethodNotAllowed,
+			expectedRes:  map[string]interface{}{},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			var resp *http.Response
+			var err error
+
+			resp, err = c.Get(apiPath + tc.pathParam)
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectedCode, resp.StatusCode)
+
+			body, err := io.ReadAll(resp.Body)
+			assert.NoError(t, err)
+
+			if tc.expectedCode == http.StatusOK {
+				var res map[string]interface{}
+				assert.NoError(t, json.Unmarshal(body, &res))
+				assert.Equal(t, tc.expectedRes["username"], res["username"])
+			}
 		})
 	}
 }
