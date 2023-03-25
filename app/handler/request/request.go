@@ -33,3 +33,36 @@ func UsernameOf(r *http.Request) (string, error) {
 	}
 	return username, nil
 }
+
+// Read query parameter `key` and return it as int64
+func QueryInt64(r *http.Request, key string, defaultValue int64) (int64, error) {
+	value := r.URL.Query().Get(key)
+	if value == "" {
+		return defaultValue, nil
+	}
+
+	parsedValue, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return -1, errors.Errorf("query parameter '%s' was not a number", key)
+	}
+	if parsedValue < 0 {
+		return -1, errors.Errorf("query parameter '%s' must not be a negative number", key)
+	}
+
+	return parsedValue, nil
+}
+
+// Read query parameter `key` and return it as bool
+func QueryBool(r *http.Request, key string, defaultValue bool) (bool, error) {
+	value := r.URL.Query().Get(key)
+	if value == "" {
+		return defaultValue, nil
+	}
+
+	parsedValue, err := strconv.ParseBool(value)
+	if err != nil {
+		return false, errors.Errorf("query parameter '%s' was not a boolean", key)
+	}
+
+	return parsedValue, nil
+}

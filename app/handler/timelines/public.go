@@ -2,12 +2,10 @@ package timelines
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
-	"strconv"
 
 	"yatter-backend-go/app/handler/httperror"
+	"yatter-backend-go/app/handler/request"
 )
 
 // Request body for `POST /v1/statuses`
@@ -16,15 +14,41 @@ type AddRequest struct {
 	MediaIds []int  `json:"media_ids"`
 }
 
+const (
+	DefaultOnlyMedia = false
+	DefaultMaxID     = 0
+	DefaultSinceID   = 0
+	DefaultLimit     = 40
+	MaxLimit         = 80
+)
+
 // Handle request for `GET /v1/timelines/public`
 func (h *handler) Public(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// TODO: エラーチェックをする
-	onlyMedia := r.URL.Query().Get("only_media") == "1"
-	maxID, _ := strconv.ParseInt(r.URL.Query().Get("max_id"), 10, 64)
-	sinceID, _ := strconv.ParseInt(r.URL.Query().Get("since_id"), 10, 64)
-	limit, _ := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
+	onlyMedia, err := request.QueryBool(r, "only_media", false)
+	if err != nil {
+		httperror.BadRequest(w, err)
+		return
+	}
+	maxID, err := request.QueryInt64(r, "max_id", DefaultMaxID)
+	if err != nil {
+		httperror.BadRequest(w, err)
+		return
+	}
+	sinceID, err := request.QueryInt64(r, "since_id", DefaultSinceID)
+	if err != nil {
+		httperror.BadRequest(w, err)
+		return
+	}
+	limit, err := request.QueryInt64(r, "limit", DefaultLimit)
+	if err != nil {
+		httperror.BadRequest(w, err)
+		return
+	}
+	if limit > MaxLimit {
+		limit = MaxLimit
+	}
 
 	timelineRepo := h.app.Dao.Timeline() // domain/repository の取得
 
@@ -34,7 +58,6 @@ func (h *handler) Public(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(fmt.Sprintf("Account: %+v", timeline))
 	// Userの情報を返す
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(timeline); err != nil {
