@@ -2,8 +2,7 @@ package accounts
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
+	"errors"
 	"net/http"
 
 	"yatter-backend-go/app/domain/object"
@@ -26,6 +25,12 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// パラメータのバリデーション
+	if err := req.Validate(); err != nil {
+		httperror.BadRequest(w, err)
+		return
+	}
+
 	// モデルを生成する
 	account := new(object.Account)
 	account.Username = req.Username
@@ -33,8 +38,6 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		httperror.InternalServerError(w, err)
 		return
 	}
-
-	log.Println(fmt.Sprintf("Account: %+v", account))
 
 	accountRepo := h.app.Dao.Account() // domain/repository の取得
 	addedAccount, err := accountRepo.Add(ctx, account)
@@ -49,4 +52,11 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		httperror.InternalServerError(w, err)
 		return
 	}
+}
+
+func (req *AddRequest) Validate() error {
+	if req.Username == "" {
+		return errors.New("username is required")
+	}
+	return nil
 }
