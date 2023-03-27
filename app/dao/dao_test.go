@@ -10,52 +10,50 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFindByUsername(t *testing.T) {
-	rawDb, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("failed to open sqlmock: %s", err)
-	}
-	defer rawDb.Close()
-
-	// sqlmock データベース接続を sqlx でラップする
-	db := sqlx.NewDb(rawDb, "sqlmock")
+// Account
+func TestAccount_FindByUsername(t *testing.T) {
+	db, mock := setup(t)
+	defer db.Close()
 
 	ctx := context.Background()
+
+	// 結果となる値をセットアップする
+	displayName := "Test User"
+	note := "Hello, world!"
+	expected := &object.Account{
+		Username:     "testuser",
+		PasswordHash: "passwordhash",
+		DisplayName:  &displayName,
+		Note:         &note,
+	}
 
 	// クエリ結果として返されるモック行をセットアップする
 	rows := sqlmock.NewRows([]string{"id", "username", "password_hash", "display_name", "avatar", "header", "note"}).
-		AddRow(1, "testuser", "passwordhash", "Test User", "", "", "Hello, world!")
+		AddRow(1, expected.Username, expected.PasswordHash, expected.DisplayName, expected.Avatar, expected.Header, expected.Note)
 
 	// クエリとその引数の期待値を設定する
 	mock.ExpectQuery("(?i)SELECT (.+) FROM account WHERE username = ?").
-		WithArgs("testuser").
+		WithArgs(expected.Username).
 		WillReturnRows(rows)
 
 	accountRepo := NewAccount(db)
-
-	account, err := accountRepo.FindByUsername(ctx, "testuser")
+	account, err := accountRepo.FindByUsername(ctx, expected.Username)
 	assert.NoError(t, err)
 	assert.NotNil(t, account)
 	assert.Equal(t, int64(1), account.ID)
-	assert.Equal(t, "testuser", account.Username)
-	assert.Equal(t, "passwordhash", account.PasswordHash)
-	assert.Equal(t, "Test User", *account.DisplayName)
-	assert.Equal(t, "", *account.Avatar)
-	assert.Equal(t, "", *account.Header)
-	assert.Equal(t, "Hello, world!", *account.Note)
+	assert.Equal(t, expected.Username, account.Username)
+	assert.Equal(t, expected.PasswordHash, account.PasswordHash)
+	assert.Equal(t, *expected.DisplayName, *account.DisplayName)
+	assert.Equal(t, expected.Avatar, account.Avatar)
+	assert.Equal(t, expected.Header, account.Header)
+	assert.Equal(t, *expected.Note, *account.Note)
 }
 
-func TestAdd(t *testing.T) {
-	rawDb, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("failed to open sqlmock: %s", err)
-	}
-	defer rawDb.Close()
-
-	db := sqlx.NewDb(rawDb, "sqlmock")
+func TestAccount_Add(t *testing.T) {
+	db, mock := setup(t)
+	defer db.Close()
 
 	ctx := context.Background()
-
 	accountRepo := NewAccount(db)
 
 	displayName := "Test User"
@@ -67,7 +65,6 @@ func TestAdd(t *testing.T) {
 		DisplayName:  &displayName,
 		Note:         &note,
 	}
-
 	// Setup mock
 	mock.ExpectExec("(?i)INSERT INTO account (.+) VALUES (.+)").
 		WithArgs(account.Username, account.PasswordHash, account.DisplayName, account.Avatar, account.Header, account.Note).
@@ -83,4 +80,15 @@ func TestAdd(t *testing.T) {
 	assert.Equal(t, account.Avatar, savedAccount.Avatar)
 	assert.Equal(t, account.Header, savedAccount.Header)
 	assert.Equal(t, *account.Note, *savedAccount.Note)
+}
+
+// Utils
+func setup(t *testing.T) (*sqlx.DB, sqlmock.Sqlmock) {
+	rawDb, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("failed to open sqlmock: %s", err)
+	}
+	// sqlmock データベース接続を sqlx でラップする
+	db := sqlx.NewDb(rawDb, "sqlmock")
+	return db, mock
 }

@@ -99,7 +99,7 @@ func (d *dao) SetupTestDB() error {
 			return fmt.Errorf("Failed to execute seed query : %v\n%+v", stmt, err)
 		} else {
 			// FIXME: debug用
-			fmt.Printf("Successfully executed statement: %v\n", stmt)
+			// fmt.Printf("Successfully executed statement: %v\n", stmt)
 		}
 	}
 	return nil
