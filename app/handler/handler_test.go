@@ -153,14 +153,14 @@ func TestStatusesPost(t *testing.T) {
 		{
 			name:         "異常系：認証できない",
 			username:     "",
-			payload:      `{"content": "ピタ ゴラ スイッチ♪", "media_ids": [0]}`,
+			payload:      `{"status": "ピタ ゴラ スイッチ♪", "media_ids": [0]}`,
 			expectedCode: http.StatusUnauthorized,
 			expectedRes:  map[string]interface{}{},
 		},
 		{
 			name:         "異常系：不正なパラメータ",
 			username:     "test-user1",
-			payload:      `{"content":"ピタ ゴラ スイッチ♪", , "media_ids": [0]}`,
+			payload:      `{"data":"ピタ ゴラ スイッチ♪", "media_ids": [0]}`,
 			expectedCode: http.StatusBadRequest,
 			expectedRes:  map[string]interface{}{},
 		},

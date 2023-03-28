@@ -2,6 +2,7 @@ package statuses
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"yatter-backend-go/app/domain/object"
@@ -19,12 +20,11 @@ type AddRequest struct {
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var req AddRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	req, err := parse(r)
+	if err != nil {
 		httperror.BadRequest(w, err)
 		return
 	}
-
 	status := new(object.Status)
 	statusRepo := h.app.Dao.Status() // domain/repository の取得
 
@@ -50,4 +50,15 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		httperror.InternalServerError(w, err)
 		return
 	}
+}
+
+func parse(r *http.Request) (*AddRequest, error) {
+	var req AddRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, err
+	}
+	if req.Status == "" {
+		return nil, fmt.Errorf("status not found")
+	}
+	return &req, nil
 }
