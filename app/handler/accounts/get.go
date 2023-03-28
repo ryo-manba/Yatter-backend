@@ -2,8 +2,6 @@ package accounts
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"yatter-backend-go/app/handler/httperror"
@@ -28,7 +26,6 @@ func (h *handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(fmt.Sprintf("Account: %+v", account))
 	// Userの情報を返す
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(account); err != nil {

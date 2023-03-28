@@ -52,7 +52,7 @@ func (h *handler) Public(w http.ResponseWriter, r *http.Request) {
 
 	timelineRepo := h.app.Dao.Timeline() // domain/repository の取得
 
-	timeline, err := timelineRepo.FindPublicTimeline(ctx, onlyMedia, maxID, sinceID, limit)
+	timeline, err := timelineRepo.FindPublic(ctx, onlyMedia, maxID, sinceID, limit)
 	if err != nil {
 		httperror.InternalServerError(w, err)
 		return

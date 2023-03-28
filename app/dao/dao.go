@@ -98,7 +98,7 @@ func (d *dao) SetupTestDB() error {
 			log.Fatalf("Failed to execute statement: %v\n%v", stmt, err)
 			return fmt.Errorf("Failed to execute seed query : %v\n%+v", stmt, err)
 		} else {
-			// FIXME: debug用
+			// debug用
 			// fmt.Printf("Successfully executed statement: %v\n", stmt)
 		}
 	}

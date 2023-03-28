@@ -6,5 +6,5 @@ import (
 )
 
 type Timeline interface {
-	FindPublicTimeline(ctx context.Context, onlyMedia bool, maxID int64, sinceID int64, limit int64) ([]*object.Status, error)
+	FindPublic(ctx context.Context, onlyMedia bool, maxID int64, sinceID int64, limit int64) ([]*object.Status, error)
 }

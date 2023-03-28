@@ -2,8 +2,6 @@ package statuses
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"yatter-backend-go/app/handler/httperror"
@@ -26,8 +24,6 @@ func (h *handler) Get(w http.ResponseWriter, r *http.Request) {
 		httperror.InternalServerError(w, err)
 		return
 	}
-	log.Println(fmt.Sprintf("Status: %+v", status))
-
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(status); err != nil {
 		httperror.InternalServerError(w, err)

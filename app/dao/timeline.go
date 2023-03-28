@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
@@ -25,9 +24,9 @@ func NewTimeline(db *sqlx.DB) repository.Timeline {
 	return &timeline{db: db}
 }
 
-// FindPublicTimeline : 公開中のタイムラインを取得する
+// FindPublic : 公開中のタイムラインを取得する
 // パラメータによって取得内容を変更する
-func (r *timeline) FindPublicTimeline(ctx context.Context, onlyMedia bool, maxID int64, sinceID int64, limit int64) ([]*object.Status, error) {
+func (r *timeline) FindPublic(ctx context.Context, onlyMedia bool, maxID int64, sinceID int64, limit int64) ([]*object.Status, error) {
 	query := `
 	SELECT s.id,
 				 s.content,
@@ -74,7 +73,6 @@ func (r *timeline) FindPublicTimeline(ctx context.Context, onlyMedia bool, maxID
 	query += " LIMIT ?"
 
 	args = append(args, limit)
-	log.Println("query", query)
 	rows, err := r.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err

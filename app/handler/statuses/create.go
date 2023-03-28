@@ -2,8 +2,6 @@ package statuses
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"yatter-backend-go/app/domain/object"
@@ -28,8 +26,6 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status := new(object.Status)
-	log.Println(fmt.Sprintf("Status: %+v", status))
-
 	statusRepo := h.app.Dao.Status() // domain/repository の取得
 
 	status.Content = req.Status
