@@ -169,6 +169,49 @@ func TestStatus_DeleteByID(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestTimeline_FindPublic(t *testing.T) {
+	db, mock := setup(t)
+	defer db.Close()
+
+	ctx := context.Background()
+	timelineRepo := NewTimeline(db)
+
+	expectedStatus := &object.Status{
+		ID:      1,
+		Content: "Hello, world!",
+		Account: &object.Account{
+			ID:           1,
+			Username:     "testuser",
+			PasswordHash: "passwordhash",
+			DisplayName:  toPtr("Test User"),
+			Note:         toPtr("Hello, world!"),
+		},
+	}
+	statusCreatedAt, _ := time.Parse("2006-01-02 15:04:05", "2023-01-01 00:00:00")
+	accountCreatedAt, _ := time.Parse("2006-01-02 15:04:05", "2023-01-01 00:00:00")
+	rows := sqlmock.NewRows([]string{"s.id", "s.content", "status_create_at", "a.id", "a.username", "a.password_hash", "a.display_name", "a.avatar", "a.header", "a.note", "account_create_at"}).
+		AddRow(expectedStatus.ID, expectedStatus.Content, statusCreatedAt, expectedStatus.Account.ID, expectedStatus.Account.Username, expectedStatus.Account.PasswordHash, *expectedStatus.Account.DisplayName, expectedStatus.Account.Avatar, expectedStatus.Account.Header, *expectedStatus.Account.Note, accountCreatedAt)
+	mock.ExpectQuery("^SELECT (.+) FROM status s INNER JOIN account a ON s.account_id = a.id").
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	statuses, err := timelineRepo.FindPublic(ctx, false, 0, 0, 40)
+	assert.NoError(t, err)
+	assert.NotNil(t, statuses)
+	assert.Len(t, statuses, 1)
+
+	status := statuses[0]
+	assert.Equal(t, expectedStatus.ID, status.ID)
+	assert.Equal(t, expectedStatus.Content, status.Content)
+	assert.Equal(t, expectedStatus.Account.ID, status.Account.ID)
+	assert.Equal(t, expectedStatus.Account.Username, status.Account.Username)
+	assert.Equal(t, expectedStatus.Account.PasswordHash, status.Account.PasswordHash)
+	assert.Equal(t, *expectedStatus.Account.DisplayName, *status.Account.DisplayName)
+	assert.Equal(t, expectedStatus.Account.Avatar, status.Account.Avatar)
+	assert.Equal(t, expectedStatus.Account.Header, status.Account.Header)
+	assert.Equal(t, *expectedStatus.Account.Note, *status.Account.Note)
+}
+
 // Utils
 func setup(t *testing.T) (*sqlx.DB, sqlmock.Sqlmock) {
 	rawDb, mock, err := sqlmock.New()
