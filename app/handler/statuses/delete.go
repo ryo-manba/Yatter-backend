@@ -22,7 +22,7 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 	statusRepo := h.app.Dao.Status() // domain/repository の取得
 	if err := statusRepo.DeleteByID(ctx, id); err != nil {
 		if errors.Is(err, customerror.ErrNotFound) {
-			httperror.NotFound(w, err)
+			httperror.NotFound(w)
 		} else {
 			httperror.InternalServerError(w, err)
 		}

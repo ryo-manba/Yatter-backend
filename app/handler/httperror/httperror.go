@@ -16,9 +16,7 @@ func BadRequest(w http.ResponseWriter, err error) {
 }
 
 // Response with Not Found (404)
-func NotFound(w http.ResponseWriter, err error) {
-	log.Printf("[NotFound] %+v", err)
-
+func NotFound(w http.ResponseWriter) {
 	Error(w, http.StatusNotFound)
 }
 

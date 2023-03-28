@@ -26,7 +26,7 @@ func (h *handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if account == nil {
-		httperror.NotFound(w, err)
+		httperror.NotFound(w)
 		return
 	}
 	// Userの情報を返す

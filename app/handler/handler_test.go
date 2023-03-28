@@ -210,9 +210,9 @@ func TestStatusesGet(t *testing.T) {
 			},
 		},
 		{
-			name:         "正常系：ステータスが存在しない",
+			name:         "異常系：ステータスが存在しない",
 			pathParam:    "10000",
-			expectedCode: http.StatusOK,
+			expectedCode: http.StatusNotFound,
 			expectedRes:  map[string]interface{}{},
 		},
 		{
