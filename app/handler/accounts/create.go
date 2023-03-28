@@ -64,5 +64,8 @@ func (req *AddRequest) Validate() error {
 	if req.Username == "" {
 		return errors.New("username is required")
 	}
+	if req.Password == "" {
+		return errors.New("password is required")
+	}
 	return nil
 }

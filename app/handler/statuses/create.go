@@ -2,6 +2,7 @@ package statuses
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -20,11 +21,16 @@ type AddRequest struct {
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	req, err := parse(r)
-	if err != nil {
+	var req AddRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httperror.BadRequest(w, err)
 		return
 	}
+	if err := req.Validate(); err != nil {
+		httperror.BadRequest(w, err)
+		return
+	}
+
 	status := new(object.Status)
 	statusRepo := h.app.Dao.Status() // domain/repository の取得
 
@@ -61,4 +67,15 @@ func parse(r *http.Request) (*AddRequest, error) {
 		return nil, fmt.Errorf("status not found")
 	}
 	return &req, nil
+}
+
+func (req *AddRequest) Validate() error {
+	if req.Status == "" {
+		return errors.New("status is required")
+	}
+	// bonus
+	// if len(req.MediaIds) == 0 {
+	// 	return errors.New("mediaID is required")
+	// }
+	return nil
 }
