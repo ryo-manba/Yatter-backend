@@ -32,7 +32,13 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// account の取得
 	status.Account = auth.AccountOf(r)
-	addedStatus, err := statusRepo.Add(ctx, status)
+
+	id, err := statusRepo.Add(ctx, status)
+	if err != nil {
+		httperror.InternalServerError(w, err)
+		return
+	}
+	addedStatus, _ := statusRepo.FindWithAccountByID(ctx, id)
 	if err != nil {
 		httperror.InternalServerError(w, err)
 		return

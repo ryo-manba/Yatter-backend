@@ -70,24 +70,22 @@ func (r *status) FindWithAccountByID(ctx context.Context, id object.StatusID) (*
 }
 
 // Add : 新規ステータス作成
-func (r *status) Add(ctx context.Context, status *object.Status) (*object.Status, error) {
+func (r *status) Add(ctx context.Context, status *object.Status) (object.StatusID, error) {
 	query := `
 	INSERT INTO status (account_id, content)
 	VALUES (?, ?)
 `
 	result, err := r.db.ExecContext(ctx, query, status.Account.ID, status.Content)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	status.ID = id
-	// アカウントのデータとともにステータスを返却する
-	return status, nil
+	return id, nil
 }
 
 // DeleteByID : ステータスの削除

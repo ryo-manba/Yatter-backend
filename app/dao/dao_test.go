@@ -138,12 +138,9 @@ func TestStatus_Add(t *testing.T) {
 		Content: expectedStatus.Content,
 	}
 
-	savedStatus, err := statusRepo.Add(ctx, status)
+	id, err := statusRepo.Add(ctx, status)
 	assert.NoError(t, err)
-	assert.NotNil(t, savedStatus)
-	assert.Equal(t, expectedStatus.ID, savedStatus.ID)
-	assert.Equal(t, expectedStatus.Content, savedStatus.Content)
-	assert.Equal(t, expectedStatus.Account.ID, savedStatus.Account.ID)
+	assert.Equal(t, expectedStatus.ID, id)
 }
 
 func TestStatus_DeleteByID(t *testing.T) {
