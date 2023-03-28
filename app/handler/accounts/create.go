@@ -40,7 +40,13 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accountRepo := h.app.Dao.Account() // domain/repository の取得
-	addedAccount, err := accountRepo.Add(ctx, account)
+	_, err := accountRepo.Add(ctx, account)
+	if err != nil {
+		httperror.InternalServerError(w, err)
+		return
+	}
+
+	addedAccount, err := accountRepo.FindByUsername(ctx, req.Username)
 	if err != nil {
 		httperror.InternalServerError(w, err)
 		return

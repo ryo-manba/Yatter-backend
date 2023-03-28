@@ -67,16 +67,9 @@ func TestAccount_Add(t *testing.T) {
 		WithArgs(account.Username, account.PasswordHash, account.DisplayName, account.Avatar, account.Header, account.Note).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	savedAccount, err := accountRepo.Add(ctx, account)
+	id, err := accountRepo.Add(ctx, account)
 	assert.NoError(t, err)
-	assert.NotNil(t, savedAccount)
-	assert.Equal(t, int64(1), savedAccount.ID)
-	assert.Equal(t, account.Username, savedAccount.Username)
-	assert.Equal(t, account.PasswordHash, savedAccount.PasswordHash)
-	assert.Equal(t, *account.DisplayName, *savedAccount.DisplayName)
-	assert.Equal(t, account.Avatar, savedAccount.Avatar)
-	assert.Equal(t, account.Header, savedAccount.Header)
-	assert.Equal(t, *account.Note, *savedAccount.Note)
+	assert.Equal(t, int64(1), id)
 }
 
 // Status

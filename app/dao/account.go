@@ -39,7 +39,7 @@ func (r *account) FindByUsername(ctx context.Context, username string) (*object.
 }
 
 // Add : 新規ユーザ作成
-func (r *account) Add(ctx context.Context, account *object.Account) (*object.Account, error) {
+func (r *account) Add(ctx context.Context, account *object.Account) (object.AccountID, error) {
 	query := `
 		INSERT INTO account (username, password_hash, display_name, avatar, header, note)
 		VALUES (?, ?, ?, ?, ?, ?)
@@ -55,15 +55,12 @@ func (r *account) Add(ctx context.Context, account *object.Account) (*object.Acc
 	)
 
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	// 挿入に成功した場合にidを取得して、accountのIDに設定する
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-
-	account.ID = id
-	return account, nil
+	return id, nil
 }
