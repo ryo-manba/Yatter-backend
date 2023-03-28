@@ -25,7 +25,10 @@ func (h *handler) Get(w http.ResponseWriter, r *http.Request) {
 		httperror.InternalServerError(w, err)
 		return
 	}
-
+	if account == nil {
+		httperror.NotFound(w, err)
+		return
+	}
 	// Userの情報を返す
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(account); err != nil {

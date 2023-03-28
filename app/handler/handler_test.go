@@ -92,9 +92,9 @@ func TestAccountsGet(t *testing.T) {
 			},
 		},
 		{
-			name:         "正常系：ユーザーが存在しない",
+			name:         "異常系：ユーザーが存在しない",
 			pathParam:    "notfound",
-			expectedCode: http.StatusOK,
+			expectedCode: http.StatusNotFound,
 			expectedRes:  map[string]interface{}{},
 		},
 		{
