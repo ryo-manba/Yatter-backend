@@ -6,10 +6,10 @@ type (
 	// Account status
 	Status struct {
 		// The internal ID of the status
-		ID StatusID `json:"-" db:"id"`
+		ID StatusID `json:"id" db:"id"`
 
 		// The account of the status
-		Account *Account `db:"-"`
+		Account *Account `json:"account" db:"-"`
 
 		// The content of the status
 		Content string `json:"content" db:"content"`

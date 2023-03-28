@@ -4,14 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/handler/httperror"
 	"yatter-backend-go/app/handler/request"
 )
 
-// Request body for `POST /v1/statuses`
-type AddRequest struct {
-	Status   string `json:"status"`
-	MediaIds []int  `json:"media_ids"`
+// Request body for `GET /v1/timelines/public`
+type Params struct {
+	OnlyMedia bool
+	MaxID     object.AccountID
+	SinceID   object.AccountID
+	Limit     int64
 }
 
 const (
@@ -26,33 +29,15 @@ const (
 func (h *handler) Public(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	onlyMedia, err := request.QueryBool(r, "only_media", false)
+	params, err := parse(r)
 	if err != nil {
 		httperror.BadRequest(w, err)
 		return
-	}
-	maxID, err := request.QueryInt64(r, "max_id", DefaultMaxID)
-	if err != nil {
-		httperror.BadRequest(w, err)
-		return
-	}
-	sinceID, err := request.QueryInt64(r, "since_id", DefaultSinceID)
-	if err != nil {
-		httperror.BadRequest(w, err)
-		return
-	}
-	limit, err := request.QueryInt64(r, "limit", DefaultLimit)
-	if err != nil {
-		httperror.BadRequest(w, err)
-		return
-	}
-	if limit > MaxLimit {
-		limit = MaxLimit
 	}
 
 	timelineRepo := h.app.Dao.Timeline() // domain/repository の取得
 
-	timeline, err := timelineRepo.FindPublic(ctx, onlyMedia, maxID, sinceID, limit)
+	timeline, err := timelineRepo.FindPublic(ctx, params.OnlyMedia, params.MaxID, params.SinceID, params.Limit)
 	if err != nil {
 		httperror.InternalServerError(w, err)
 		return
@@ -64,4 +49,33 @@ func (h *handler) Public(w http.ResponseWriter, r *http.Request) {
 		httperror.InternalServerError(w, err)
 		return
 	}
+}
+
+func parse(r *http.Request) (*Params, error) {
+	onlyMedia, err := request.QueryBool(r, "only_media", false)
+	if err != nil {
+		return nil, err
+	}
+	maxID, err := request.QueryInt64(r, "max_id", DefaultMaxID)
+	if err != nil {
+		return nil, err
+	}
+	sinceID, err := request.QueryInt64(r, "since_id", DefaultSinceID)
+	if err != nil {
+		return nil, err
+	}
+	limit, err := request.QueryInt64(r, "limit", DefaultLimit)
+	if err != nil {
+		return nil, err
+	}
+	if limit > MaxLimit {
+		limit = MaxLimit
+	}
+
+	return &Params{
+		OnlyMedia: onlyMedia,
+		MaxID:     maxID,
+		SinceID:   sinceID,
+		Limit:     limit,
+	}, nil
 }

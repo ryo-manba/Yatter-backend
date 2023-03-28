@@ -28,10 +28,10 @@ func NewTimeline(db *sqlx.DB) repository.Timeline {
 // パラメータによって取得内容を変更する
 func (r *timeline) FindPublic(ctx context.Context, onlyMedia bool, maxID int64, sinceID int64, limit int64) ([]*object.Status, error) {
 	query := `
-	SELECT s.id,
+	SELECT s.id as status_id,
 				 s.content,
 				 s.create_at as status_create_at,
-				 a.id,
+				 a.id as account_id,
 				 a.username,
 				 a.password_hash,
 				 a.display_name,
@@ -47,8 +47,8 @@ func (r *timeline) FindPublic(ctx context.Context, onlyMedia bool, maxID int64, 
 	args := make([]interface{}, 0)
 
 	if onlyMedia {
-		// mediaの処理を追加する
-		//		whereClauses = append(whereClauses, "s.id IN (SELECT status_id FROM media)")
+		// NOTE: bonusでmediaのテーブルを追加する
+		// whereClauses = append(whereClauses, "s.id IN (SELECT status_id FROM media)")
 	}
 
 	if maxID > 0 {
@@ -109,5 +109,6 @@ func (r *timeline) FindPublic(ctx context.Context, onlyMedia bool, maxID int64, 
 			return nil, fmt.Errorf("%w", err)
 		}
 	}
+
 	return statuses, nil
 }
