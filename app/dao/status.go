@@ -104,7 +104,6 @@ func (r *status) DeleteByID(ctx context.Context, id object.StatusID) error {
 		return err
 	}
 
-	println("affectedRows", affectedRows)
 	// 削除したかを確かめる
 	if affectedRows == 0 {
 		return customerror.ErrNotFound

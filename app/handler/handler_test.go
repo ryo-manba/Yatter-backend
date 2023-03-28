@@ -16,7 +16,7 @@ import (
 )
 
 /// Accounts
-func TestAccountRegistration(t *testing.T) {
+func TestAccount_Registration(t *testing.T) {
 	c := setup(t)
 	defer c.Close()
 
@@ -72,7 +72,7 @@ func TestAccountRegistration(t *testing.T) {
 	}
 }
 
-func TestAccountsGet(t *testing.T) {
+func TestAccount_Get(t *testing.T) {
 	c := setup(t)
 	defer c.Close()
 
@@ -129,7 +129,7 @@ func TestAccountsGet(t *testing.T) {
 }
 
 /// status
-func TestStatusesPost(t *testing.T) {
+func TestStatus_Create(t *testing.T) {
 	c := setup(t)
 	defer c.Close()
 
@@ -190,7 +190,7 @@ func TestStatusesPost(t *testing.T) {
 	}
 }
 
-func TestStatusesGet(t *testing.T) {
+func TestStatus_Get(t *testing.T) {
 	c := setup(t)
 	defer c.Close()
 
@@ -252,7 +252,87 @@ func TestStatusesGet(t *testing.T) {
 	}
 }
 
-func TestPublicTimelineGet(t *testing.T) {
+func TestStatus_Delete(t *testing.T) {
+	c := setup(t)
+	defer c.Close()
+
+	const apiPath = "/v1/statuses/"
+	testCases := []struct {
+		name         string
+		username     string
+		pathParam    string
+		expectedCode int
+		expectedRes  map[string]interface{}
+	}{
+		{
+			name:         "正常系：ステータスを削除できる",
+			username:     "test-user1",
+			pathParam:    "1",
+			expectedCode: http.StatusOK,
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：ステータスが存在しない",
+			username:     "test-user1",
+			pathParam:    "10000",
+			expectedCode: http.StatusNotFound,
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：ステータス作成者とユーザが一致しない",
+			username:     "test-user1",
+			pathParam:    "5",
+			expectedCode: http.StatusBadRequest,
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：認証できない",
+			username:     "",
+			pathParam:    "10000",
+			expectedCode: http.StatusUnauthorized,
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：パラメータが数値ではない",
+			username:     "test-user1",
+			pathParam:    "hoge",
+			expectedCode: http.StatusBadRequest,
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：パラメータなし",
+			username:     "test-user1",
+			pathParam:    "",
+			expectedCode: http.StatusMethodNotAllowed,
+			expectedRes:  map[string]interface{}{},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			var resp *http.Response
+			var err error
+
+			// 認証する
+			resp, err = c.DeleteJSONWithAuth(apiPath+tc.pathParam, tc.username)
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectedCode, resp.StatusCode)
+
+			body, err := io.ReadAll(resp.Body)
+			assert.NoError(t, err)
+
+			if tc.expectedCode == http.StatusOK {
+				var res map[string]interface{}
+				assert.NoError(t, json.Unmarshal(body, &res))
+				assert.Equal(t, tc.expectedRes["content"], res["content"])
+			}
+		})
+	}
+}
+
+func TestTimeline_PublicGet(t *testing.T) {
 	c := setup(t)
 	defer c.Close()
 
@@ -380,6 +460,16 @@ func (c *C) PostJSONWithAuth(apiPath string, payload string, username string) (*
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authentication", "username "+username)
+	return c.Server.Client().Do(req)
+}
+
+func (c *C) DeleteJSONWithAuth(apiPath string, username string) (*http.Response, error) {
+	req, err := http.NewRequest("DELETE", c.asURL(apiPath), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("accept", "application/json")
 	req.Header.Set("Authentication", "username "+username)
 	return c.Server.Client().Do(req)
 }
