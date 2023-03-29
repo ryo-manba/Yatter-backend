@@ -35,9 +35,9 @@ func (h *handler) Public(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	timelineRepo := h.app.Dao.Timeline() // domain/repository の取得
+	statusRepo := h.app.Dao.Status() // domain/repository の取得
 
-	timeline, err := timelineRepo.FindPublic(ctx, params.OnlyMedia, params.MaxID, params.SinceID, params.Limit)
+	timeline, err := statusRepo.FindPublicTimelines(ctx, params.OnlyMedia, params.MaxID, params.SinceID, params.Limit)
 	if err != nil {
 		httperror.InternalServerError(w, err)
 		return

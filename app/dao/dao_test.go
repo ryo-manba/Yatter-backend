@@ -247,12 +247,12 @@ func TestStatus_DeleteByID(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestTimeline_FindPublic(t *testing.T) {
+func TestStatus_FindPublicTimelines(t *testing.T) {
 	db, mock := setup(t)
 	defer db.Close()
 
 	ctx := context.Background()
-	timelineRepo := NewTimeline(db)
+	statusRepo := NewStatus(db)
 
 	expectedStatus := &object.Status{
 		ID:      1,
@@ -273,7 +273,7 @@ func TestTimeline_FindPublic(t *testing.T) {
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	statuses, err := timelineRepo.FindPublic(ctx, false, 0, 0, 40)
+	statuses, err := statusRepo.FindPublicTimelines(ctx, false, 0, 0, 40)
 	assert.NoError(t, err)
 	assert.NotNil(t, statuses)
 	assert.Len(t, statuses, 1)

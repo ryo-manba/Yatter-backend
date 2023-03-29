@@ -13,4 +13,6 @@ type Status interface {
 	Add(ctx context.Context, status *object.Status) (object.StatusID, error)
 	// Delete Status
 	DeleteByID(ctx context.Context, id object.StatusID) error
+	// Find PublicTimeline
+	FindPublicTimelines(ctx context.Context, onlyMedia bool, maxID int64, sinceID int64, limit int64) (object.Timelines, error)
 }
