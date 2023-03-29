@@ -27,17 +27,17 @@ type (
 		// The account's display name
 		DisplayName *string `json:"display_name,omitempty" db:"display_name"`
 
+		// The time the account was created
+		CreateAt DateTime `json:"create_at,omitempty" db:"create_at"`
+
+		// Biography of user
+		Note *string `json:"note,omitempty" db:"note"`
+
 		// URL to the avatar image
 		Avatar *string `json:"avatar,omitempty" db:"avatar"`
 
 		// URL to the header image
 		Header *string `json:"header,omitempty" db:"header"`
-
-		// Biography of user
-		Note *string `json:"note,omitempty" db:"note"`
-
-		// The time the account was created
-		CreateAt DateTime `json:"create_at,omitempty" db:"create_at"`
 	}
 )
 

@@ -11,8 +11,12 @@ import (
 
 // Request body for `POST /v1/accounts`
 type AddRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	DisplayName string `json:"display_name"`
+	Note        string `json:"note"`
+	Avatar      string `json:"avatar"`
+	Header      string `json:"header"`
 }
 
 // Handle request for `POST /v1/accounts`
@@ -32,8 +36,13 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// モデルを生成する
-	account := new(object.Account)
-	account.Username = req.Username
+	account := &object.Account{
+		Username:    req.Username,
+		Avatar:      &req.Avatar,
+		Note:        &req.Note,
+		Header:      &req.Header,
+		DisplayName: &req.DisplayName,
+	}
 	if err := account.SetPassword(req.Password); err != nil {
 		httperror.InternalServerError(w, err)
 		return
