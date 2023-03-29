@@ -29,7 +29,7 @@ func TestAccount_Registration(t *testing.T) {
 	}{
 		{
 			name:         "正常系：作成できる",
-			payload:      `{"username":"john"}`,
+			payload:      `{"username":"john", "password":"xxx"}`,
 			expectedCode: http.StatusOK,
 			expectedRes: map[string]interface{}{
 				"username": "john",
@@ -37,13 +37,19 @@ func TestAccount_Registration(t *testing.T) {
 		},
 		{
 			name:         "異常系：すでにユーザーが存在する",
-			payload:      `{"username":"john"}`,
-			expectedCode: http.StatusInternalServerError, // TODO: 409 Conflictを返すようにする？
+			payload:      `{"username":"john", "password":"xxx"}`,
+			expectedCode: http.StatusInternalServerError,
 			expectedRes:  map[string]interface{}{},
 		},
 		{
-			name:         "異常系：不正なパラメータ",
-			payload:      `{"name":"john"}`,
+			name:         "異常系：パスワードが存在しない",
+			payload:      `{"name":"test"}`,
+			expectedCode: http.StatusBadRequest,
+			expectedRes:  map[string]interface{}{},
+		},
+		{
+			name:         "異常系：名前が存在しない",
+			payload:      `{"password":"test"}`,
 			expectedCode: http.StatusBadRequest,
 			expectedRes:  map[string]interface{}{},
 		},
