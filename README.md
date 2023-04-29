@@ -1,4 +1,4 @@
-# road-to-dmm
+# Yatter-backend
 
 Twitter・Mastodonに似た仮想SNSサービスYatterのバックエンドAPIをGo言語で実装しています。
 
